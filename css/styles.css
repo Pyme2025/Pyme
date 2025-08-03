@@ -44,6 +44,11 @@ button:hover {
     background-color: #666;
 }
 
+.error {
+    color: red;
+    text-align: center;
+}
+
 @media (max-width: 600px) {
     form {
         width: 90%;
