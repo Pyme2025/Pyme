@@ -57,3 +57,28 @@ button:hover {
         font-size: 16px;
     }
 }
+/* Estilos para approve-users.html */
+#pending-users div {
+    background-color: #f9f9f9;
+    border-radius: 5px;
+}
+#pending-users select, #pending-users button {
+    margin: 5px;
+    padding: 5px 10px;
+}
+#pending-users button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+#pending-users button:hover {
+    background-color: #0056b3;
+}
+#pending-users button:nth-child(2) {
+    background-color: #dc3545;
+}
+#pending-users button:nth-child(2):hover {
+    background-color: #a71d2a;
+}
