@@ -1,10 +1,13 @@
-// Asegura que Supabase esté disponible globalmente
-const { createClient } = supabase; // Asume que el CDN carga 'supabase' globalmente
+// Verificar que el CDN de Supabase esté cargado
+if (typeof supabase === 'undefined') {
+    console.error('Error: El CDN de Supabase no se cargó correctamente.');
+    throw new Error('Supabase CDN no está disponible');
+}
+
+// Inicializar cliente de Supabase
 const supabaseUrl = 'https://nyzlexsevgdwxgsarsfm.supabase.co';
 const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55emxleHNldmdkd3hnc2Fyc2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM0OTA2NTEsImV4cCI6MjA2OTA2NjY1MX0.ZOKdhOvtaalHNOYTUDAGy4aO65tJ50L0VQcJk1Vl_Co';
-
-// Inicializa el cliente de Supabase
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
+const supabase = supabase.createClient(supabaseUrl, supabaseAnonKey);
 
 // Función para obtener el rol del usuario
 async function getUserRole(userId) {
@@ -34,5 +37,5 @@ async function logAudit(userId, action, details, ip = 'unknown') {
     }
 }
 
-// Exporta supabase globalmente para otros scripts
+// Hacer supabase accesible globalmente
 window.supabase = supabase;
