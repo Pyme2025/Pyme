@@ -51,16 +51,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
             let selfie_url = null;
             if (selfie) {
-                console.log('Subiendo selfie a Supabase Storage...');
+                console.log('Subiendo selfie al bucket selfies...');
                 const fileName = `${email}_${Date.now()}.jpg`;
                 const { data, error: uploadError } = await window.supabase.storage
                     .from('selfies')
                     .upload(fileName, selfie, { contentType: 'image/jpeg' });
                 if (uploadError) {
-                    console.error('Error al subir selfie:', uploadError);
+                    console.error('Detalles del error al subir selfie:', uploadError);
                     throw new Error('Error al subir selfie: ' + uploadError.message);
                 }
+                console.log('Selfie subido exitosamente:', data);
                 selfie_url = `${supabaseUrl}/storage/v1/object/public/selfies/${fileName}`;
+                console.log('URL del selfie:', selfie_url);
+            } else {
+                console.log('No se proporcionó selfie, continuando sin imagen.');
             }
 
             console.log('Insertando usuario en pending_users...');
@@ -84,7 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             console.log('Registrando auditoría de registro...');
             // Registrar auditoría
-            await logAudit(null, 'register_attempt', { email, username }, 'unknown');
+            await logAudit(null, 'register_attempt', { email, username, has_selfie: !!selfie }, 'unknown');
 
             errorMessage.textContent = 'Registro enviado. Espera aprobación de Recursos Humanos.';
             setTimeout(() => window.location.href = '/Pyme/login.html', 2000);
