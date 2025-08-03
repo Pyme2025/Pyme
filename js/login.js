@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const errorMessage = document.getElementById('errorMessage');
     const loginForm = document.getElementById('loginForm');
 
+    // Verificar que Supabase esté definido
     if (!window.supabase) {
         errorMessage.textContent = 'Error: No se pudo conectar con el servidor. Por favor, intenta de nuevo.';
         console.error('Supabase no está definido. Verifica que supabase.js se cargue correctamente.');
@@ -17,7 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             // Verificar si el usuario está en pending_users
-            const { data: pendingUser, error: pendingError } = await supabase
+            const { data: pendingUser, error: pendingError } = await window.supabase
                 .from('pending_users')
                 .select('status')
                 .eq('email', email)
@@ -31,11 +32,11 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             // Intentar iniciar sesión
-            const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+            const { data, error } = await window.supabase.auth.signInWithPassword({ email, password });
             if (error) throw new Error(error.message);
 
             // Verificar si el usuario existe en la tabla users
-            const { data: userData, error: userError } = await supabase
+            const { data: userData, error: userError } = await window.supabase
                 .from('users')
                 .select('id')
                 .eq('email', email)
@@ -65,7 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         try {
-            const { error } = await supabase.auth.resetPasswordForEmail(email, {
+            const { error } = await window.supabase.auth.resetPasswordForEmail(email, {
                 redirectTo: 'https://pyme2025.github.io/Pyme/reset-password.html'
             });
             if (error) throw error;
@@ -80,7 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setInterval(() => {
         const lastActivity = sessionStorage.getItem('lastActivity');
         if (lastActivity && (Date.now() - lastActivity) > 15 * 60 * 1000) {
-            supabase.auth.signOut();
+            window.supabase.auth.signOut();
             window.location.href = '/Pyme/login.html';
         }
     }, 60000);
