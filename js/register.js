@@ -3,9 +3,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const errorMessage = document.getElementById('errorMessage');
 
     // Verificar que Supabase esté definido
-    if (!window.supabase) {
-        errorMessage.textContent = 'Error: No se pudo conectar con el servidor. Por favor, intenta de nuevo.';
-        console.error('Supabase no está definido. Verifica que supabase.js se cargue correctamente.');
+    if (!window.supabase || typeof window.supabase.from !== 'function') {
+        errorMessage.textContent = 'Error: No se pudo conectar con el servidor. Por favor, recarga la página.';
+        console.error('Supabase no está definido o .from no es una función. Verifica el CDN y supabase.js.');
         return;
     }
 
@@ -33,6 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
+            console.log('Verificando si el usuario ya existe en pending_users...');
             // Verificar si el email o usuario ya existe
             const { data: existingUser, error: userError } = await window.supabase
                 .from('pending_users')
@@ -40,6 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 .or(`email.eq.${email},username.eq.${username}`)
                 .single();
             if (userError && userError.code !== 'PGRST116') {
+                console.error('Error al verificar usuario:', userError);
                 throw new Error('Error al verificar usuario: ' + userError.message);
             }
             if (existingUser) {
@@ -49,14 +51,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
             let selfie_url = null;
             if (selfie) {
+                console.log('Subiendo selfie a Supabase Storage...');
                 const fileName = `${email}_${Date.now()}.jpg`;
                 const { data, error: uploadError } = await window.supabase.storage
                     .from('selfies')
                     .upload(fileName, selfie, { contentType: 'image/jpeg' });
-                if (uploadError) throw new Error('Error al subir selfie: ' + uploadError.message);
+                if (uploadError) {
+                    console.error('Error al subir selfie:', uploadError);
+                    throw new Error('Error al subir selfie: ' + uploadError.message);
+                }
                 selfie_url = `${supabaseUrl}/storage/v1/object/public/selfies/${fileName}`;
             }
 
+            console.log('Insertando usuario en pending_users...');
             // Insertar en pending_users
             const { error: insertError } = await window.supabase
                 .from('pending_users')
@@ -70,8 +77,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     selfie_url,
                     status: 'pending'
                 }]);
-            if (insertError) throw new Error('Error al registrar: ' + insertError.message);
+            if (insertError) {
+                console.error('Error al insertar en pending_users:', insertError);
+                throw new Error('Error al registrar: ' + insertError.message);
+            }
 
+            console.log('Registrando auditoría de registro...');
             // Registrar auditoría
             await logAudit(null, 'register_attempt', { email, username }, 'unknown');
 
