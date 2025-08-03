@@ -7,12 +7,20 @@ if (typeof supabase === 'undefined') {
 // Inicializar cliente de Supabase
 const supabaseUrl = 'https://nyzlexsevgdwxgsarsfm.supabase.co';
 const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55emxleHNldmdkd3hnc2Fyc2ZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM0OTA2NTEsImV4cCI6MjA2OTA2NjY1MX0.ZOKdhOvtaalHNOYTUDAGy4aO65tJ50L0VQcJk1Vl_Co';
-const supabase = supabase.createClient(supabaseUrl, supabaseAnonKey);
+
+try {
+    const { createClient } = supabase;
+    window.supabase = createClient(supabaseUrl, supabaseAnonKey);
+    console.log('Cliente de Supabase inicializado correctamente');
+} catch (error) {
+    console.error('Error al inicializar Supabase:', error);
+    throw error;
+}
 
 // Función para obtener el rol del usuario
 async function getUserRole(userId) {
     try {
-        const { data, error } = await supabase
+        const { data, error } = await window.supabase
             .from('user_roles')
             .select('roles(name)')
             .eq('user_id', userId)
@@ -28,7 +36,7 @@ async function getUserRole(userId) {
 // Función para registrar auditoría
 async function logAudit(userId, action, details, ip = 'unknown') {
     try {
-        const { error } = await supabase
+        const { error } = await window.supabase
             .from('audit_logs')
             .insert([{ user_id: userId, action, details: JSON.stringify(details), ip_address: ip }]);
         if (error) throw error;
@@ -36,6 +44,3 @@ async function logAudit(userId, action, details, ip = 'unknown') {
         console.error('Error en auditoría:', error.message);
     }
 }
-
-// Hacer supabase accesible globalmente
-window.supabase = supabase;
