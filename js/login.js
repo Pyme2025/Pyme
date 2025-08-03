@@ -3,9 +3,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('loginForm');
 
     // Verificar que Supabase esté definido
-    if (!window.supabase) {
-        errorMessage.textContent = 'Error: No se pudo conectar con el servidor. Por favor, intenta de nuevo.';
-        console.error('Supabase no está definido. Verifica que supabase.js se cargue correctamente.');
+    if (!window.supabase || typeof window.supabase.from !== 'function') {
+        errorMessage.textContent = 'Error: No se pudo conectar con el servidor. Por favor, recarga la página.';
+        console.error('Supabase no está definido o .from no es una función. Verifica el CDN y supabase.js.');
         return;
     }
 
@@ -17,6 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const password = document.getElementById('password').value;
 
         try {
+            console.log('Intentando verificar usuario en pending_users...');
             // Verificar si el usuario está en pending_users
             const { data: pendingUser, error: pendingError } = await window.supabase
                 .from('pending_users')
@@ -24,6 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 .eq('email', email)
                 .single();
             if (pendingError && pendingError.code !== 'PGRST116') {
+                console.error('Error al verificar pending_users:', pendingError);
                 throw new Error('Error al verificar estado: ' + pendingError.message);
             }
             if (pendingUser && pendingUser.status === 'pending') {
@@ -31,10 +33,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
+            console.log('Intentando iniciar sesión con Supabase Auth...');
             // Intentar iniciar sesión
             const { data, error } = await window.supabase.auth.signInWithPassword({ email, password });
-            if (error) throw new Error(error.message);
+            if (error) {
+                console.error('Error en signInWithPassword:', error);
+                throw new Error(error.message);
+            }
 
+            console.log('Verificando usuario en la tabla users...');
             // Verificar si el usuario existe en la tabla users
             const { data: userData, error: userError } = await window.supabase
                 .from('users')
@@ -42,15 +49,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 .eq('email', email)
                 .single();
             if (userError || !userData) {
+                console.error('Error en consulta a users:', userError);
                 errorMessage.textContent = 'Usuario no encontrado. Por favor, regístrate.';
                 return;
             }
 
+            console.log('Registrando auditoría de login...');
             // Registrar auditoría
             await logAudit(data.user.id, 'login', { email }, 'unknown');
 
             // Establecer timeout de sesión
             sessionStorage.setItem('lastActivity', Date.now());
+            console.log('Redirigiendo a dashboard...');
             window.location.href = '/Pyme/dashboard.html';
         } catch (error) {
             errorMessage.textContent = 'Error al iniciar sesión: ' + error.message;
@@ -66,10 +76,14 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         try {
+            console.log('Solicitando restablecimiento de contraseña...');
             const { error } = await window.supabase.auth.resetPasswordForEmail(email, {
                 redirectTo: 'https://pyme2025.github.io/Pyme/reset-password.html'
             });
-            if (error) throw error;
+            if (error) {
+                console.error('Error en resetPasswordForEmail:', error);
+                throw error;
+            }
             errorMessage.textContent = 'Se ha enviado un enlace de restablecimiento a tu correo.';
         } catch (error) {
             errorMessage.textContent = 'Error al enviar el enlace: ' + error.message;
@@ -81,6 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setInterval(() => {
         const lastActivity = sessionStorage.getItem('lastActivity');
         if (lastActivity && (Date.now() - lastActivity) > 15 * 60 * 1000) {
+            console.log('Sesión expirada, cerrando sesión...');
             window.supabase.auth.signOut();
             window.location.href = '/Pyme/login.html';
         }
