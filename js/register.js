@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     console.error('Error al subir selfie:', uploadError);
                     throw new Error('Error al subir la selfie: ' + uploadError.message);
                 }
-                selfie_url = `${supabaseUrl}/storage/v1/object/public/selfies/${fileName}`;
+                selfie_url = `https://nyzlexsevgdwxgsarsfm.supabase.co/storage/v1/object/public/selfies/${fileName}`;
                 console.log('Selfie subida:', selfie_url);
             }
 
