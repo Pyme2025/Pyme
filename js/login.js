@@ -31,8 +31,8 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log('Usuario autenticado:', data.user.email);
             const role = await getUserRole(data.user.id);
             if (!role) {
-                console.error('No se encontró rol para el usuario:', data.user.id);
-                throw new Error('Error al verificar estado: No se encontró rol');
+                console.warn('No se encontró rol para el usuario:', data.user.id);
+                throw new Error('No tienes un rol asignado. Contacta a Recursos Humanos.');
             }
 
             console.log('Rol del usuario:', role);
