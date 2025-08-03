@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const registerForm = document.getElementById('registerForm');
     const errorMessage = document.getElementById('errorMessage');
 
+    // Verificar que Supabase esté definido
     if (!window.supabase) {
         errorMessage.textContent = 'Error: No se pudo conectar con el servidor. Por favor, intenta de nuevo.';
         console.error('Supabase no está definido. Verifica que supabase.js se cargue correctamente.');
@@ -33,12 +34,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             // Verificar si el email o usuario ya existe
-            const { data: existingUser, error: userError } = await supabase
+            const { data: existingUser, error: userError } = await window.supabase
                 .from('pending_users')
                 .select('email, username')
                 .or(`email.eq.${email},username.eq.${username}`)
                 .single();
-            if (userError && userError.code !== 'PGRST116') { // PGRST116 indica que no se encontraron resultados
+            if (userError && userError.code !== 'PGRST116') {
                 throw new Error('Error al verificar usuario: ' + userError.message);
             }
             if (existingUser) {
@@ -49,7 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
             let selfie_url = null;
             if (selfie) {
                 const fileName = `${email}_${Date.now()}.jpg`;
-                const { data, error: uploadError } = await supabase.storage
+                const { data, error: uploadError } = await window.supabase.storage
                     .from('selfies')
                     .upload(fileName, selfie, { contentType: 'image/jpeg' });
                 if (uploadError) throw new Error('Error al subir selfie: ' + uploadError.message);
@@ -57,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             // Insertar en pending_users
-            const { error: insertError } = await supabase
+            const { error: insertError } = await window.supabase
                 .from('pending_users')
                 .insert([{
                     name,
