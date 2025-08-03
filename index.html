@@ -16,19 +16,24 @@
         <p id="company-info">Somos una empresa dedicada a la reparación de electrodomésticos con años de experiencia.</p>
         <a href="login.html">Iniciar Sesión</a> | <a href="register.html">Registrarse</a>
     </main>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
     <script src="js/supabase.js"></script>
     <script>
         async function loadCompanyInfo() {
-            const { data, error } = await supabase.from('company_info').select('*').single();
-            if (!error && data) {
-                document.getElementById('company-name').textContent = data.name;
-                document.getElementById('company-slogan').textContent = data.slogan || '';
-                document.getElementById('company-logo').src = data.logo_url || 'assets/default-logo.png';
-                if (data.colors) {
-                    document.documentElement.style.setProperty('--light-blue', data.colors.primary || '#ADD8E6');
-                    document.documentElement.style.setProperty('--gray', data.colors.secondary || '#808080');
+            try {
+                const { data, error } = await supabase.from('company_info').select('*').single();
+                if (error) throw error;
+                if (data) {
+                    document.getElementById('company-name').textContent = data.name;
+                    document.getElementById('company-slogan').textContent = data.slogan || '';
+                    document.getElementById('company-logo').src = data.logo_url || 'assets/default-logo.png';
+                    if (data.colors) {
+                        document.documentElement.style.setProperty('--light-blue', data.colors.primary || '#ADD8E6');
+                        document.documentElement.style.setProperty('--gray', data.colors.secondary || '#808080');
+                    }
                 }
+            } catch (error) {
+                console.error('Error loading company info:', error.message);
             }
         }
         loadCompanyInfo();
