@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     const registerForm = document.getElementById('registerForm');
     const errorMessage = document.getElementById('errorMessage');
+    const selfieInput = document.getElementById('selfie');
 
     // Verificar que Supabase esté definido
     if (!window.supabase || typeof window.supabase.from !== 'function') {
@@ -19,56 +20,35 @@ document.addEventListener('DOMContentLoaded', () => {
         const email = document.getElementById('email').value;
         const birthdate = document.getElementById('birthdate').value;
         const password = document.getElementById('password').value;
-        const confirm_password = document.getElementById('confirm_password').value;
-        const selfie = document.getElementById('selfie').files[0];
-
-        // Validar contraseña
-        if (password !== confirm_password) {
-            errorMessage.textContent = 'Las contraseñas no coinciden';
-            return;
-        }
-        if (password.length < 8 || !/[A-Z]/.test(password) || !/[0-9]/.test(password)) {
-            errorMessage.textContent = 'La contraseña debe tener al menos 8 caracteres, una mayúscula y un número';
-            return;
-        }
+        const selfie = selfieInput.files[0];
 
         try {
-            console.log('Verificando si el usuario ya existe en pending_users...');
-            // Verificar si el email o usuario ya existe
-            const { data: existingUser, error: userError } = await window.supabase
-                .from('pending_users')
-                .select('email, username')
-                .or(`email.eq.${email},username.eq.${username}`)
-                .single();
-            if (userError && userError.code !== 'PGRST116') {
-                console.error('Error al verificar usuario:', userError);
-                throw new Error('Error al verificar usuario: ' + userError.message);
-            }
-            if (existingUser) {
-                errorMessage.textContent = 'El correo o usuario ya está registrado';
-                return;
+            console.log('Registrando usuario:', email);
+
+            // Validar datos
+            if (!name || !last_name || !username || !email || !birthdate || !password) {
+                throw new Error('Todos los campos son obligatorios');
             }
 
+            // Subir selfie si existe
             let selfie_url = null;
             if (selfie) {
-                console.log('Subiendo selfie al bucket selfies...');
-                const fileName = `${email}_${Date.now()}.jpg`;
+                console.log('Subiendo selfie...');
+                const fileExt = selfie.name.split('.').pop();
+                const fileName = `${Date.now()}_${username}.${fileExt}`;
                 const { data, error: uploadError } = await window.supabase.storage
                     .from('selfies')
-                    .upload(fileName, selfie, { contentType: 'image/jpeg' });
+                    .upload(fileName, selfie);
                 if (uploadError) {
-                    console.error('Detalles del error al subir selfie:', uploadError);
-                    throw new Error('Error al subir selfie: ' + uploadError.message);
+                    console.error('Error al subir selfie:', uploadError);
+                    throw new Error('Error al subir la selfie: ' + uploadError.message);
                 }
-                console.log('Selfie subido exitosamente:', data);
                 selfie_url = `${supabaseUrl}/storage/v1/object/public/selfies/${fileName}`;
-                console.log('URL del selfie:', selfie_url);
-            } else {
-                console.log('No se proporcionó selfie, continuando sin imagen.');
+                console.log('Selfie subida:', selfie_url);
             }
 
-            console.log('Insertando usuario en pending_users...');
             // Insertar en pending_users
+            console.log('Insertando en pending_users...');
             const { error: insertError } = await window.supabase
                 .from('pending_users')
                 .insert([{
@@ -77,21 +57,19 @@ document.addEventListener('DOMContentLoaded', () => {
                     username,
                     email,
                     birthdate,
-                    password_hash: password, // En producción, usar hash seguro
+                    password_hash: password, // Texto plano para pruebas
                     selfie_url,
                     status: 'pending'
                 }]);
             if (insertError) {
                 console.error('Error al insertar en pending_users:', insertError);
-                throw new Error('Error al registrar: ' + insertError.message);
+                throw new Error('Error al registrar usuario: ' + insertError.message);
             }
 
-            console.log('Registrando auditoría de registro...');
-            // Registrar auditoría
-            await logAudit(null, 'register_attempt', { email, username, has_selfie: !!selfie }, 'unknown');
-
-            errorMessage.textContent = 'Registro enviado. Espera aprobación de Recursos Humanos.';
-            setTimeout(() => window.location.href = '/Pyme/login.html', 2000);
+            console.log('Usuario registrado en pending_users:', email);
+            errorMessage.textContent = 'Registro exitoso. Espera la aprobación de Recursos Humanos.';
+            errorMessage.style.color = 'green';
+            registerForm.reset();
         } catch (error) {
             errorMessage.textContent = 'Error: ' + error.message;
             console.error('Error en registro:', error);
