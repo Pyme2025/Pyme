@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Servicios en Campo - PYME2025</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <header>
+        <h1>Servicios en Campo</h1>
+        <p id="user-info"></p>
+    </header>
+    <form id="fieldServiceForm">
+        <label for="service_id">ID del Servicio:</label>
+        <input type="number" id="service_id" required>
+        <label for="customer_name">Nombre del Cliente:</label>
+        <input type="text" id="customer_name" required>
+        <label for="error_reported">Error Reportado:</label>
+        <input type="text" id="error_reported" required>
+        <label for="status">Estado:</label>
+        <select id="status" required>
+            <option value="pendiente">Pendiente</option>
+            <option value="diagnóstico">Diagnóstico</option>
+            <option value="completado">Completado</option>
+            <option value="cancelado">Cancelado</option>
+        </select>
+        <label for="evidence">Evidencia:</label>
+        <input type="file" id="evidence" accept="image/*" capture="environment">
+        <button type="button" id="startBtn">Registrar Llegada</button>
+        <button type="submit">Guardar Cambios</button>
+    </form>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase.js"></script>
+    <script src="js/servicio_en_campo.js"></script>
+</body>
+</html>

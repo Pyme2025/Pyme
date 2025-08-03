@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alta de Servicio - PYME2025</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <header>
+        <h1>Alta de Servicio</h1>
+        <p id="user-info"></p>
+    </header>
+    <form id="serviceForm">
+        <label for="origin">Origen del Servicio:</label>
+        <select id="origin" required>
+            <option value="propio">Propio</option>
+            <option value="whirlpool">Whirlpool</option>
+        </select>
+        <label for="customer_name">Nombre del Cliente:</label>
+        <input type="text" id="customer_name" required>
+        <label for="customer_address">Dirección:</label>
+        <input type="text" id="customer_address" required>
+        <label for="customer_phone">Teléfono:</label>
+        <input type="tel" id="customer_phone" required>
+        <label for="appliance_type">Tipo de Electrodoméstico:</label>
+        <input type="text" id="appliance_type" required>
+        <label for="appliance_model">Modelo:</label>
+        <input type="text" id="appliance_model" list="whirlpool_models">
+        <datalist id="whirlpool_models"></datalist>
+        <label for="error_reported">Error Reportado:</label>
+        <select id="error_reported_select" style="display: none;"></select>
+        <input type="text" id="error_reported_text" required>
+        <label for="scheduled_date">Fecha Programada:</label>
+        <input type="date" id="scheduled_date" required>
+        <label for="urgency">Urgencia:</label>
+        <select id="urgency" required>
+            <option value="baja">Baja</option>
+            <option value="media">Media</option>
+            <option value="alta">Alta</option>
+        </select>
+        <label for="evidence">Evidencia (opcional):</label>
+        <input type="file" id="evidence" accept="image/*" capture="environment">
+        <button type="submit">Guardar Servicio</button>
+    </form>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase.js"></script>
+    <script src="js/alta_servicio.js"></script>
+</body>
+</html>
