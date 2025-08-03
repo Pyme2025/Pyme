@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aprobar Usuarios - PYME2025</title>
+    <link rel="stylesheet" href="/Pyme/css/styles.css">
+</head>
+<body>
+    <header>
+        <h1>Aprobar Usuarios</h1>
+        <div id="user-info">
+            <img id="user-selfie" src="/Pyme/assets/default-logo.png" alt="Foto de perfil" style="width: 50px; border-radius: 50%;">
+            <span id="user-name"></span>
+            <button id="logoutBtn">Cerrar Sesión</button>
+        </div>
+    </header>
+    <main>
+        <h3>Usuarios Pendientes</h3>
+        <div id="pending-users"></div>
+        <p class="error" id="errorMessage"></p>
+    </main>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+    <script src="/Pyme/js/supabase.js"></script>
+    <script src="/Pyme/js/approve-users.js"></script>
+</body>
+</html>
